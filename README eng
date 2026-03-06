@@ -1,0 +1,190 @@
+FilterData API
+
+API for normalization and quality scoring of contact data before loading it into CRM systems. 
+
+FilterData normalizes phone numbers, emails and personal names and helps detect problematic records before they enter CRM, marketing systems or lead databases.
+
+Typical use cases
+
+cleaning leads before importing into CRM
+
+phone number normalization
+
+email standardization
+
+duplicate reduction
+
+improving contact database quality
+
+What the API does
+
+FilterData accepts contact data and returns:
+
+normalized values
+
+technical data quality score (QC)
+
+human-readable explanation of the result
+
+Supported fields
+phone
+name
+email
+Example request
+
+POST
+
+https://filterdata.ru/demo/api/v1/demo/normalize
+
+Body
+
+{
+  "phone": "8 (999) 123-45-67",
+  "name": "иван иванов",
+  "email": "EXAMPLE@mail.com"
+}
+Example response
+{
+  "phone": "+79991234567",
+  "name": "Иванов Иван",
+  "email": "ivanov@example.com",
+  "qc": 0,
+  "explanation": "Data is valid and ready for use."
+}
+Data Quality Levels (QC)
+
+QC indicates the technical quality of the record.
+
+QC	Level	Description
+0	VALID	Data is correct
+1	ACCEPTABLE	Acceptable but not perfect
+2	RISK	Suspicious data
+3	PARTIAL	Incomplete data
+4	MISSING	Field is missing
+Example of risky data
+Иванов Ivan
+
+Mixed Cyrillic and Latin characters.
+
+Demo API
+
+A public demo endpoint is available for testing.
+
+POST
+
+https://filterdata.ru/demo/api/v1/demo/normalize
+Demo limitations
+
+up to 100 requests per day per IP
+
+no API key required
+
+simplified phone normalization
+
+Pricing
+FREE (test)
+
+For development and initial integration.
+
+5 000 records / month
+
+RPS: 2
+
+Batch: not supported
+
+Payload: up to 0.2 MB
+
+Hard limit
+
+START — 2 990 RUB
+
+For small and growing businesses.
+
+100 000 records / month
+
+RPS: 20
+
+Batch: up to 100
+
+Payload: up to 1 MB
+
+Soft limit
+
+Support: email
+
+STANDARD — 7 990 RUB
+
+For integrators and regular workloads.
+
+500 000 records / month
+
+RPS: 50
+
+Batch: up to 300
+
+Payload: up to 3 MB
+
+Queueing under heavy load
+
+Support: email + chat
+
+BUSINESS — 14 990 RUB
+
+For systems processing large volumes of data.
+
+1 500 000 records / month
+
+RPS: 100
+
+Batch: up to 500
+
+Payload: up to 5 MB
+
+Priority queue
+
+Priority support
+
+Typical applications
+
+CRM integrations
+
+Email marketing systems
+
+Call centers
+
+E-commerce platforms
+
+Lead generation platforms
+
+FilterData helps clean contact data before it enters business workflows.
+
+Quick test with curl
+curl -X POST https://filterdata.ru/demo/api/v1/demo/normalize \
+-H "Content-Type: application/json" \
+-d '{
+  "phone":"8 (999) 123-45-67",
+  "name":"иван иванов",
+  "email":"EXAMPLE@mail.com"
+}'
+Roadmap
+
+Planned features:
+
+contact deduplication
+
+database quality reports
+
+batch normalization for large files
+
+advanced email validation
+
+Contacts
+
+Website
+https://filterdata.ru
+
+API Documentation
+https://filterdata.ru/docs
+
+Email
+info@filterdata.ru 
