@@ -34,7 +34,7 @@ Example request
 
 POST
 
-https://filterdata.ru/demo/api/v1/demo/normalize
+https://filterdata.ru/docs#/default/demo_normalize_api_v1_demo_normalize_post
 
 Body
 
@@ -72,7 +72,7 @@ A public demo endpoint is available for testing.
 
 POST
 
-https://filterdata.ru/demo/api/v1/demo/normalize
+https://filterdata.ru/docs#/default/demo_normalize_api_v1_demo_normalize_post
 Demo limitations
 
 up to 100 requests per day per IP
