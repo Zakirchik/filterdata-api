@@ -25,7 +25,7 @@ Example request
 
 POST
 
-https://filterdata.ru/api/v1/normalize
+https://filterdata.ru/docs#/Normalize/demo_normalize_api_v1_demo_normalize_post
 
 Body
 
