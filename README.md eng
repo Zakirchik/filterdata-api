@@ -1,40 +1,31 @@
 FilterData API
 
-API for normalization and quality scoring of contact data before loading it into CRM systems. 
+API for normalization and quality scoring of contact data before loading it into CRM systems, marketing platforms and lead databases.
 
-FilterData normalizes phone numbers, emails and personal names and helps detect problematic records before they enter CRM, marketing systems or lead databases.
-
-Typical use cases
-
-cleaning leads before importing into CRM
-
-phone number normalization
-
-email standardization
-
-duplicate reduction
-
-improving contact database quality
+FilterData standardizes phone numbers, emails and personal names and returns a technical quality score that helps detect problematic records before they enter business systems.
 
 What the API does
 
 FilterData accepts contact data and returns:
 
-normalized values
+• normalized values
+• data quality score (QC)
+• QC breakdown for each field
+• warnings about suspicious records
 
-technical data quality score (QC)
+Supported fields:
 
-human-readable explanation of the result
-
-Supported fields
 phone
+
 name
+
 email
+
 Example request
 
 POST
 
-https://filterdata.ru/docs#/default/demo_normalize_api_v1_demo_normalize_post
+https://filterdata.ru/api/v1/normalize
 
 Body
 
@@ -46,145 +37,151 @@ Body
 Example response
 {
   "phone": "+79991234567",
-  "name": "Иванов Иван",
-  "email": "ivanov@example.com",
+  "name": "Иван Иванов",
+  "email": "example@mail.com",
   "qc": 0,
-  "explanation": "Data is valid and ready for use."
+  "qc_breakdown": {
+    "phone": 0,
+    "name": 0,
+    "email": 0
+  },
+  "warnings": []
+}
+Batch API (processing up to 1000 contacts)
+
+For migration of large databases or bulk imports the API supports batch processing.
+
+Endpoint:
+
+POST /api/v1/batch
+
+Maximum:
+
+1000 contacts per request
+
+Example request
+
+{
+  "contacts": [
+    {
+      "phone": "8 (999) 123-45-67",
+      "name": "иван иванов",
+      "email": "EXAMPLE@mail.com"
+    },
+    {
+      "phone": "+7 (912) 000-00-00",
+      "name": "Ivanov Иван",
+      "email": " USER@MAIL.RU "
+    }
+  ]
+}
+
+Example response
+
+{
+  "results": [
+    {
+      "phone": "+79991234567",
+      "name": "Иван Иванов",
+      "email": "example@mail.com",
+      "qc": 0,
+      "qc_breakdown": {
+        "phone": 0,
+        "name": 0,
+        "email": 0
+      },
+      "warnings": []
+    },
+    {
+      "phone": "+79120000000",
+      "name": "Ivanov Иван",
+      "email": "user@mail.ru",
+      "qc": 2,
+      "qc_breakdown": {
+        "phone": 0,
+        "name": 2,
+        "email": 0
+      },
+      "warnings": ["name_mixed_alphabet_risk"]
+    }
+  ]
 }
 Data Quality Levels (QC)
 
-QC indicates the technical quality of the record.
+QC indicates technical quality of the record.
 
 QC	Level	Description
 0	VALID	Data is correct
 1	ACCEPTABLE	Acceptable but not perfect
 2	RISK	Suspicious data
-3	PARTIAL	Incomplete data
-4	MISSING	Field is missing
+3	PARTIAL	Incomplete or invalid
+4	MISSING	Field missing
+
 Example of risky data
-Иванов Ivan
+
+Иванov Ivan
 
 Mixed Cyrillic and Latin characters.
 
+Typical use cases
+
+• cleaning leads before importing into CRM
+• phone number normalization
+• email standardization
+• improving contact database quality
+• preprocessing contact data before analytics
+
 Demo API
 
-A public demo endpoint is available for testing.
+Interactive documentation:
 
-POST
-
-https://filterdata.ru/docs#/default/demo_normalize_api_v1_demo_normalize_post
-Demo limitations
-
-up to 100 requests per day per IP
-
-no API key required
-
-simplified phone normalization
-
+https://filterdata.ru/docs
 Pricing
-FREE (test)
 
-For development and initial integration.
+FREE
 
-5 000 records / month
-
+5000 records / month
 RPS: 2
-
 Batch: not supported
+Payload: 0.2 MB
 
-Payload: up to 0.2 MB
+START
 
-Hard limit
-
-START — 2 990 RUB
-
-For small and growing businesses.
-
-100 000 records / month
-
+100000 records / month
 RPS: 20
-
 Batch: up to 100
+Payload: 1 MB
 
-Payload: up to 1 MB
+STANDARD
 
-Soft limit
-
-Support: email
-
-STANDARD — 7 990 RUB
-
-For integrators and regular workloads.
-
-500 000 records / month
-
+500000 records / month
 RPS: 50
-
 Batch: up to 300
+Payload: 3 MB
 
-Payload: up to 3 MB
+BUSINESS
 
-Queueing under heavy load
-
-Support: email + chat
-
-BUSINESS — 14 990 RUB
-
-For systems processing large volumes of data.
-
-1 500 000 records / month
-
+1500000 records / month
 RPS: 100
-
 Batch: up to 500
-
-Payload: up to 5 MB
-
-Priority queue
-
-Priority support
-
-Typical applications
-
-CRM integrations
-
-Email marketing systems
-
-Call centers
-
-E-commerce platforms
-
-Lead generation platforms
-
-FilterData helps clean contact data before it enters business workflows.
+Payload: 5 MB
 
 Quick test with curl
-curl -X POST https://filterdata.ru/demo/api/v1/demo/normalize \
+curl -X POST https://filterdata.ru/api/v1/normalize \
 -H "Content-Type: application/json" \
+-H "X-API-Key: YOUR_KEY" \
 -d '{
   "phone":"8 (999) 123-45-67",
   "name":"иван иванов",
   "email":"EXAMPLE@mail.com"
 }'
-Roadmap
-
-Planned features:
-
-contact deduplication
-
-database quality reports
-
-batch normalization for large files
-
-advanced email validation
-
 Contacts
 
 Website
 https://filterdata.ru
 
-API Documentation
+Documentation
 https://filterdata.ru/docs
 
 Email
-info@filterdata.ru 
+info@filterdata.ru
