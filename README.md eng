@@ -1,40 +1,139 @@
-FilterData API
+FilterData API 
 
-API for normalization and quality scoring of contact data before loading it into CRM systems, marketing platforms and lead databases.
+High-performance API for normalization and quality scoring of contact data (PII) before importing into CRM and marketing systems.
 
-FilterData standardizes phone numbers, emails and personal names and returns a technical quality score that helps detect problematic records before they enter business systems.
+FilterData converts unstructured contact dumps from Excel, forms and CRM exports into clean, normalized and quality-scored records.
 
-What the API does
+Typical use cases:
 
-FilterData accepts contact data and returns:
+CRM data imports
 
-• normalized values
-• data quality score (QC)
-• QC breakdown for each field
-• warnings about suspicious records
+marketing mailing lists
 
-Supported fields:
+lead databases
 
-phone
+contact deduplication pipelines
 
-name
+Core Features
+Phone normalization (RU)
 
-email
+Input numbers are converted to international format.
 
-Example request
+Example:
 
-POST
+8 (999) 123-45-67
 
-https://filterdata.ru/docs#/Normalize/demo_normalize_api_v1_demo_normalize_post
+Result:
 
-Body
++79991234567
 
-{
-  "phone": "8 (999) 123-45-67",
-  "name": "иван иванов",
-  "email": "EXAMPLE@mail.com"
-}
-Example response
+The system removes:
+
+spaces
+
+brackets
+
+dashes
+
+non-digit symbols
+
+and converts Russian numbers starting with 8 → +7.
+
+Email normalization
+
+The system performs:
+
+trimming
+
+lowercase conversion
+
+syntax validation
+
+Example:
+
+User@GMAIL.com
+
+Result:
+
+user@gmail.com
+Email typo detection (Levenshtein)
+
+The engine detects possible typos in common email domains using Levenshtein distance.
+
+Checked domains:
+
+gmail.com
+yahoo.com
+outlook.com
+hotmail.com
+icloud.com
+mail.ru
+yandex.ru
+
+Example:
+
+Input
+
+user@agmil.com
+
+Output
+
+email: user@agmil.com
+qc: 2
+warnings: ["email_domain_typo"]
+
+The system does not auto-correct the domain.
+It only flags the record as RISK.
+
+Name normalization
+
+Names are cleaned and normalized:
+
+иВан12
+
+Result
+
+Иван
+
+Processing includes:
+
+removing digits
+
+fixing capitalization
+
+removing invalid symbols
+
+limiting name length to three words
+
+Mixed alphabet detection
+
+The engine detects mixed Cyrillic / Latin characters.
+
+Example:
+
+Ивaн
+
+(Latin "a")
+
+Such records are marked as:
+
+QC = RISK
+
+This prevents CRM search issues and duplicate records.
+
+Data Quality Scoring
+
+Each processed record receives a quality score (QC).
+
+QC	Status	Description
+0	VALID	Data is clean and fully usable
+1	ACCEPTABLE	Minor issues (for example only first name)
+2	RISK	Possible typo or mixed alphabet
+3	PARTIAL	Incomplete or suspicious data
+4	MISSING	Field is empty or unusable
+
+Example response:
+
 {
   "phone": "+79991234567",
   "name": "Иван Иванов",
@@ -47,141 +146,96 @@ Example response
   },
   "warnings": []
 }
-Batch API (processing up to 1000 contacts)
+Batch Processing
 
-For migration of large databases or bulk imports the API supports batch processing.
+The API supports batch processing.
 
-Endpoint:
+Up to 1000 contacts per request.
 
-POST /api/v1/batch
+This significantly reduces request overhead when processing large datasets.
 
-Maximum:
+Performance
 
-1000 contacts per request
+Typical performance metrics:
 
-Example request
+Latency: ~12-15 ms per request
+Core normalization engine: ~700-800 RPS
+Batch endpoint: ~400-500 RPS
+
+Performance depends on hardware and configuration.
+
+Technology Stack
+
+Backend
+
+Python
+FastAPI
+
+Server
+
+Nginx
+Uvicorn
+systemd
+
+Database
+
+SQLite
+
+SQLite is used for:
+
+API key storage
+
+usage tracking
+
+request accounting
+
+API Example
+
+Request
+
+POST /api/v1/normalize
+
+Example:
+
+curl -X POST https://filterdata.ru/api/v1/normalize \
+-H "X-API-Key: YOUR_SECRET_KEY" \
+-d '{
+  "phone": "8 (999) 123-45-67",
+  "name": "иван иванов",
+  "email": "EXAMPLE@mail.com"
+}'
+
+Response
 
 {
-  "contacts": [
-    {
-      "phone": "8 (999) 123-45-67",
-      "name": "иван иванов",
-      "email": "EXAMPLE@mail.com"
-    },
-    {
-      "phone": "+7 (912) 000-00-00",
-      "name": "Ivanov Иван",
-      "email": " USER@MAIL.RU "
-    }
-  ]
+  "phone": "+79991234567",
+  "name": "Иван Иванов",
+  "email": "example@mail.com",
+  "qc": 0,
+  "qc_breakdown": {
+    "phone": 0,
+    "name": 0,
+    "email": 0
+  },
+  "warnings": []
 }
+Pricing Plans
+Plan	Monthly limit	RPS	Batch
+FREE	5 000	2	no
+START	100 000	20	up to 100
+STANDARD	500 000	50	up to 300
+BUSINESS	1 500 000	100	up to 500
+Documentation
 
-Example response
-
-{
-  "results": [
-    {
-      "phone": "+79991234567",
-      "name": "Иван Иванов",
-      "email": "example@mail.com",
-      "qc": 0,
-      "qc_breakdown": {
-        "phone": 0,
-        "name": 0,
-        "email": 0
-      },
-      "warnings": []
-    },
-    {
-      "phone": "+79120000000",
-      "name": "Ivanov Иван",
-      "email": "user@mail.ru",
-      "qc": 2,
-      "qc_breakdown": {
-        "phone": 0,
-        "name": 2,
-        "email": 0
-      },
-      "warnings": ["name_mixed_alphabet_risk"]
-    }
-  ]
-}
-Data Quality Levels (QC)
-
-QC indicates technical quality of the record.
-
-QC	Level	Description
-0	VALID	Data is correct
-1	ACCEPTABLE	Acceptable but not perfect
-2	RISK	Suspicious data
-3	PARTIAL	Incomplete or invalid
-4	MISSING	Field missing
-
-Example of risky data
-
-Иванov Ivan
-
-Mixed Cyrillic and Latin characters.
-
-Typical use cases
-
-• cleaning leads before importing into CRM
-• phone number normalization
-• email standardization
-• improving contact database quality
-• preprocessing contact data before analytics
-
-Demo API
-
-Interactive documentation:
+Swagger UI
 
 https://filterdata.ru/docs
-Pricing
-
-FREE
-
-5000 records / month
-RPS: 2
-Batch: not supported
-Payload: 0.2 MB
-
-START
-
-100000 records / month
-RPS: 20
-Batch: up to 100
-Payload: 1 MB
-
-STANDARD
-
-500000 records / month
-RPS: 50
-Batch: up to 300
-Payload: 3 MB
-
-BUSINESS
-
-1500000 records / month
-RPS: 100
-Batch: up to 500
-Payload: 5 MB
-
-Quick test with curl
-curl -X POST https://filterdata.ru/api/v1/normalize \
--H "Content-Type: application/json" \
--H "X-API-Key: YOUR_KEY" \
--d '{
-  "phone":"8 (999) 123-45-67",
-  "name":"иван иванов",
-  "email":"EXAMPLE@mail.com"
-}'
-Contacts
+Contact
 
 Website
+
 https://filterdata.ru
 
-Documentation
-https://filterdata.ru/docs
-
 Email
+
 info@filterdata.ru
