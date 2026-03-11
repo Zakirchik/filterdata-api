@@ -1,0 +1,106 @@
+openapi: 3.1.0
+info:
+  title: FilterData Demo API
+  version: "demo-1.0"
+  description: |
+    Public demo endpoint (no API key).
+
+    Base URL: https://filterdata.ru/demo
+
+servers:
+  - url: https://filterdata.ru/demo
+
+paths:
+  /normalize:
+    post:
+      summary: Demo normalize
+      description: Normalize phone, name and/or email (demo mode).
+      operationId: demoNormalize
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DemoRequest"
+            examples:
+              sample:
+                value:
+                  phone: 8 (999) 123-45-67
+                  name: "иван иванов"
+                  email: "EXAMPLE@gmail.com"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoErrorResponse"
+        "429":
+          description: Demo rate limit reached
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DemoErrorResponse"
+
+components:
+  schemas:
+    QCLevel:
+      type: integer
+      enum: [0, 1, 2, 3, 4]
+
+    DemoRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        phone:
+          type: ["string", "null"]
+          examples: ["8 (999) 123-45-67", "+7 912 345-67-89"]
+        name:
+          type: ["string", "null"]
+          examples: ["иван иванов", "Ivan Petrov"]
+        email:
+          type: ["string", "null"]
+          examples: ["EXAMPLE@gmail.com", "user+test@domain.org"]
+
+    DemoResponse:
+      type: object
+      additionalProperties: false
+      required: [qc, explanation]
+      properties:
+        phone:
+          type: ["string", "null"]
+        name:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        qc:
+          $ref: "#/components/schemas/QCLevel"
+        explanation:
+          type: string
+
+    DemoErrorResponse:
+      type: object
+      additionalProperties: true
+      required: [error, status_code, demo, notice]
+      properties:
+        error:
+          type: string
+        status_code:
+          type: integer
+        demo:
+          type: boolean
+        notice:
+          type: string
+

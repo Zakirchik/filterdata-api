@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "FilterData API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://filterdata.ru",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "YOUR_API_KEY",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Demo - Normalize",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"8 (999) 123-45-67\",\n  \"name\": \"иван иванов\",\n  \"email\": \"user@agmil.com\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/demo/normalize"
+        }
+      }
+    },
+    {
+      "name": "Production - Normalize",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"8 (999) 123-45-67\",\n  \"name\": \"Иванov\",\n  \"email\": \"EXAMPLE@gmail.com\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/normalize"
+        }
+      }
+    },
+    {
+      "name": "Production - Batch",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contacts\": [\n    {\n      \"phone\": \"8 (999) 123-45-67\",\n      \"name\": \"иван иванов\",\n      \"email\": \"EXAMPLE@gmail.com\"\n    },\n    {\n      \"phone\": \"+7 912 000-00-00\",\n      \"name\": \"Иванov\",\n      \"email\": \"user@agmil.com\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/batch"
+        }
+      }
+    }
+  ]
+}
+
